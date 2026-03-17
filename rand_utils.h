@@ -9,10 +9,15 @@
 #include "typedefs.h"
 
 static inline void rand_init(u32 seed);
+
 static inline i32 rand_rand();
+
 [[nodiscard]] static inline i32 rand_i32_uniform(i32 min, i32 max);
+
 [[nodiscard]] static inline f64 rand_f64_uniform(f64 min, f64 max);
+
 [[nodiscard]] static inline f64 rand_f64_uniform_01();
+
 [[nodiscard]] static inline f64 rand_f64_negexp(f64 mean);
 
 

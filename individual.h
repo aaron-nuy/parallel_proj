@@ -6,10 +6,8 @@
 #define PARALLEL_PROJ_INDIVIDUAL_H
 #include "typedefs.h"
 
-const MIN_IND_ARR_CAPACITY = 5;
-
 typedef enum {
-    Susceptible = (u8)0,
+    Susceptible = (u8) 0,
     Exposed,
     Infected,
     Recovered
@@ -31,11 +29,8 @@ typedef struct Individual {
     } state_duration;
 } Individual;
 
-typedef struct {
-    u32* indices;
-    u32 size;
-    u32 capacity;
-    const u32 MIN_CAPACITY;
-} IndividualNode;
+[[nodiscard]] static inline Individual individual_create(IndividualState state, u32 time_in_state, u32 grid_pos_x,
+                                                         u32 grid_pos_y, f64 duration_exposed, f64 duration_infected,
+                                                         f64 duration_recovered);
 
 #endif //PARALLEL_PROJ_INDIVIDUAL_H
