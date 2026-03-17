@@ -24,5 +24,10 @@ if(NOT raylib_FOUND)
     FetchContent_MakeAvailable(raylib)
 endif()
 
-add_executable(parallel_proj main.c)
+add_executable(parallel_proj main.c
+        typedefs.h
+        rand_utils.h
+        rand_utils.c
+        individual.h
+        grid.h)
 target_link_libraries(parallel_proj PRIVATE MPI::MPI_C raylib m)
