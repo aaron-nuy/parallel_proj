@@ -30,8 +30,8 @@ void simulation_populate(Simulation *simulation)
         // Only pick 20 infected individuals
         IndividualState state = i % 1000 == 0 ? Infected : Susceptible;
 
-        u32 x_pos = rand_i32_uniform(0, simulation->grid.width);
-        u32 y_pos = rand_i32_uniform(0, simulation->grid.height);
+        u32 x_pos = rand_i32_uniform(0, simulation->grid.width - 1);
+        u32 y_pos = rand_i32_uniform(0, simulation->grid.height - 1);
         f64 de = rand_f64_negexp(3.0);
         f64 di = rand_f64_negexp(7.0);
         f64 dr = rand_f64_negexp(365.0);
@@ -109,8 +109,8 @@ void simulation_move_individuals_random(Simulation *simulation)
                                simulation->individuals[i].previous_state == Infected);
 
 
-        simulation->individuals[i].grid_pos_x = rand_i32_uniform(0, simulation->grid.width);
-        simulation->individuals[i].grid_pos_y = rand_i32_uniform(0, simulation->grid.height);
+        simulation->individuals[i].grid_pos_x = rand_i32_uniform(0, simulation->grid.width - 1);
+        simulation->individuals[i].grid_pos_y = rand_i32_uniform(0, simulation->grid.height - 1);
         grid_add_individual(&simulation->grid, simulation->individuals[i].grid_pos_x,
                             simulation->individuals[i].grid_pos_y, simulation->individuals[i].state == Infected);
     }
