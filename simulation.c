@@ -101,7 +101,7 @@ void simulation_step(Simulation *simulation)
 
 void simulation_move_individuals_random(Simulation *simulation)
 {
-    for (u32 i = 0; i > simulation->total_individuals; i++)
+    for (u32 i = 0; i < simulation->total_individuals; i++)
     {
         // Handle old cell counter, must be computed using previous state and not current one
         grid_remove_individual(&simulation->grid, simulation->individuals[i].grid_pos_x,
