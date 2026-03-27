@@ -8,17 +8,19 @@
 #include <math.h>
 #include "typedefs.h"
 
-static inline void rand_init(u32 seed);
+void rand_init(u32 seed);
 
-static inline i32 rand_rand();
+i32 rand_rand();
 
-[[nodiscard]] static inline i32 rand_i32_uniform(i32 min, i32 max);
+[[nodiscard]] i32 rand_i32_uniform(i32 min, i32 max);
 
-[[nodiscard]] static inline f64 rand_f64_uniform(f64 min, f64 max);
+[[nodiscard]] f64 rand_f64_uniform(f64 min, f64 max);
 
-[[nodiscard]] static inline f64 rand_f64_uniform_01();
+[[nodiscard]] f64 rand_f64_uniform_01();
 
-[[nodiscard]] static inline f64 rand_f64_negexp(f64 mean);
+[[nodiscard]] f64 rand_f64_negexp(f64 mean);
+
+[[nodiscard]] bool should_transition(u32 num_inf_neighbors);
 
 
 #endif //PARALLEL_PROJ_RAND_UTILS_H

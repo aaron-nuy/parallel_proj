@@ -39,7 +39,7 @@ void rand_init(u32 seed)
         (void) rand_rand();
 }
 
-[[nodiscard]] static inline i32 rand_rand(void)
+[[nodiscard]] i32 rand_rand(void)
 {
     _rand_table[_rand_fptr] += _rand_table[_rand_rptr];
 
@@ -57,25 +57,31 @@ void rand_init(u32 seed)
     return result;
 }
 
-[[nodiscard]] static inline i32 rand_i32_uniform(i32 min, i32 max)
+[[nodiscard]] i32 rand_i32_uniform(i32 min, i32 max)
 {
     return min + rand_rand() % (max - min + 1);
 }
 
-[[nodiscard]] static inline f64 rand_f64_uniform(f64 min, f64 max)
+[[nodiscard]] f64 rand_f64_uniform(f64 min, f64 max)
 {
     return min + (max - min) * (rand_rand() / (f64) RAND_MAX);
 }
 
-[[nodiscard]] static inline f64 rand_f64_uniform_01(void)
+[[nodiscard]] f64 rand_f64_uniform_01(void)
 {
     return rand_rand() / (f64) RAND_MAX;
 }
 
-[[nodiscard]] static inline f64 rand_f64_negexp(f64 mean)
+[[nodiscard]] f64 rand_f64_negexp(f64 mean)
 {
     f64 u = rand_rand() / (f64) RAND_MAX;
     if (u >= 1.0)
         u = 1.0 - DBL_EPSILON;
     return -mean * log(1.0 - u);
+}
+
+[[nodiscard]] bool should_transition(u32 num_inf_neighbors)
+{
+    const f64 p = 1 - exp(-0.5 * num_inf_neighbors);
+    return p > rand_f64_uniform_01();
 }

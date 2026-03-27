@@ -15,21 +15,22 @@ typedef enum {
 
 typedef struct Individual {
     IndividualState state;
+    IndividualState previous_state;
     u32 time_in_state;
 
-    // keep position in grid for fast modifying of grid
+    // keep position in the grid for fast access to indiviual position
     u32 grid_pos_x, grid_pos_y;
 
     // every individual has random state durations but remain the same throughout the
     // entire simulation
     struct {
-        const f64 exposed;
-        const f64 infected;
-        const f64 recovered;
+        f64 exposed;
+        f64 infected;
+        f64 recovered;
     } state_duration;
 } Individual;
 
-[[nodiscard]] static inline Individual individual_create(IndividualState state, u32 time_in_state, u32 grid_pos_x,
+[[nodiscard]] Individual individual_create(IndividualState state, u32 time_in_state, u32 grid_pos_x,
                                                          u32 grid_pos_y, f64 duration_exposed, f64 duration_infected,
                                                          f64 duration_recovered);
 
