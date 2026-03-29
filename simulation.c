@@ -4,8 +4,6 @@
 
 #include "simulation.h"
 
-#include <stdlib.h>
-
 #include "rand_utils.h"
 
 [[nodiscard]] Simulation simulation_create(u32 total_individuals, u32 iteratoins_to_run, u32 grid_width,
@@ -17,7 +15,7 @@
         .current_iter = 0,
         .iterations_to_run = iteratoins_to_run,
         .grid = grid_create(grid_width, grid_height),
-        .individuals = malloc(total_individuals * sizeof(Individual))
+        .individual_soa = individual_soa_create(total_individuals)
     };
 }
 
@@ -25,8 +23,6 @@ void simulation_populate(Simulation *simulation)
 {
     for (u32 i = 0; i < simulation->total_individuals; i++)
     {
-        // TODO: Ask prof how to decide on which individuals should be the infected ones
-
         // Only pick 20 infected individuals
         IndividualState state = i % 1000 == 0 ? Infected : Susceptible;
 
@@ -35,7 +31,17 @@ void simulation_populate(Simulation *simulation)
         f64 de = rand_f64_negexp(3.0);
         f64 di = rand_f64_negexp(7.0);
         f64 dr = rand_f64_negexp(365.0);
-        simulation->individuals[i] = individual_create(state, 0, x_pos, y_pos, de, di, dr);
+
+        simulation->individual_soa.states[i] = state;
+        simulation->individual_soa.previous_states[i] = state;
+        simulation->individual_soa.times_in_state[i] = 0;
+
+        simulation->individual_soa.grid_poss_x[i] = x_pos;
+        simulation->individual_soa.grid_poss_y[i] = y_pos;
+
+        simulation->individual_soa.exposeds[i] = de;
+        simulation->individual_soa.infecteds[i] = di;
+        simulation->individual_soa.recovereds[i] = dr;
 
         grid_add_individual(&simulation->grid, x_pos, y_pos, state == Infected);
     }
@@ -52,67 +58,71 @@ void simulation_run(Simulation *simulation)
 
 void simulation_step(Simulation *simulation)
 {
+    IndividualState *states = simulation->individual_soa.states;
+    IndividualState *previous_states = simulation->individual_soa.previous_states;
+    u32 *times_in_state = simulation->individual_soa.times_in_state;
+
+    u32 *grid_poss_x = simulation->individual_soa.grid_poss_x;
+    u32 *grid_poss_y = simulation->individual_soa.grid_poss_y;
+
+    f64 *exposed = simulation->individual_soa.exposeds;
+    f64 *infected = simulation->individual_soa.infecteds;
+    f64 *recovered = simulation->individual_soa.recovereds;
+
     for (u32 i = 0; i < simulation->total_individuals; i++)
     {
-        Individual *individual = &simulation->individuals[i];
-        individual->previous_state = individual->state;
+        previous_states[i] = states[i];
 
-        // Manage cell cached infected individuals on state change
-        switch (individual->state)
+        switch (states[i])
         {
-            case Susceptible:
+            case Susceptible: {
                 const u32 num_infected_neighbors = simulation_get_num_infected_neighbors(
-                    simulation, individual->grid_pos_x, individual->grid_pos_y);
+                    simulation, grid_poss_x[i], grid_poss_y[i]);
 
                 if (should_transition(num_infected_neighbors))
                 {
-                    individual->state = Exposed;
-                    individual->time_in_state = 0;
+                    states[i] = Exposed;
+                    times_in_state[i] = 0;
                 }
                 break;
+            }
             case Exposed:
-                if (individual->time_in_state > individual->state_duration.exposed)
+                if (times_in_state[i] > exposed[i])
                 {
-                    individual->state = Infected;
-                    individual->time_in_state = 0;
+                    states[i] = Infected;
+                    times_in_state[i] = 0;
                 }
                 break;
             case Infected:
-                if (individual->time_in_state > individual->state_duration.infected)
+                if (times_in_state[i] > infected[i])
                 {
-                    individual->state = Recovered;
-                    individual->time_in_state = 0;
+                    states[i] = Recovered;
+                    times_in_state[i] = 0;
                 }
                 break;
             case Recovered:
-                if (individual->time_in_state > individual->state_duration.recovered)
+                if (times_in_state[i] > recovered[i])
                 {
-                    individual->state = Susceptible;
-                    individual->time_in_state = 0;
+                    states[i] = Susceptible;
+                    times_in_state[i] = 0;
                 }
                 break;
         }
 
-        individual->time_in_state++;
+        times_in_state[i]++;
     }
 
-    simulation_move_individuals_random(simulation);
-}
-
-void simulation_move_individuals_random(Simulation *simulation)
-{
     for (u32 i = 0; i < simulation->total_individuals; i++)
     {
-        // Handle old cell counter, must be computed using previous state and not current one
-        grid_remove_individual(&simulation->grid, simulation->individuals[i].grid_pos_x,
-                               simulation->individuals[i].grid_pos_y,
-                               simulation->individuals[i].previous_state == Infected);
+        grid_remove_individual(&simulation->grid, grid_poss_x[i],
+                               grid_poss_y[i],
+                               previous_states[i] == Infected);
 
+        grid_poss_x[i] = rand_i32_uniform(0, simulation->grid.width - 1);
+        grid_poss_y[i] = rand_i32_uniform(0, simulation->grid.height - 1);
 
-        simulation->individuals[i].grid_pos_x = rand_i32_uniform(0, simulation->grid.width - 1);
-        simulation->individuals[i].grid_pos_y = rand_i32_uniform(0, simulation->grid.height - 1);
-        grid_add_individual(&simulation->grid, simulation->individuals[i].grid_pos_x,
-                            simulation->individuals[i].grid_pos_y, simulation->individuals[i].state == Infected);
+        grid_add_individual(&simulation->grid, grid_poss_x[i],
+                            grid_poss_y[i], states[i] == Infected);
     }
 }
 
@@ -128,19 +138,23 @@ void simulation_move_individuals_random(Simulation *simulation)
 [[nodiscard]] u32 simulation_get_num_infected_neighbors(Simulation *simulation, u32 x, u32 y)
 {
     u32 num_infected_neighbors = 0;
-    const u32 w = simulation->grid.width;
-    const u32 h = simulation->grid.height;
+    const u32 width = simulation->grid.width;
+    const u32 height = simulation->grid.height;
 
-    for (i32 i = -1; i <= 1; i++)
-    {
-        for (i32 j = -1; j <= 1; j++)
-        {
-            u32 curr_x = ((u32) ((i32) x + i) + w) % w;
-            u32 curr_y = ((u32) ((i32) y + j) + h) % h;
+    u32 wrapped_left_x = x == 0 ? width - 1 : x - 1;
+    u32 wrapped_right_x = x == width - 1 ? 0 : x + 1;
+    u32 wrapped_above_y = y == 0 ? height - 1 : y - 1;
+    u32 wrapped_below_y = y == height - 1 ? 0 : y + 1;
 
-            num_infected_neighbors += *grid_get_cell(&simulation->grid, curr_x, curr_y);
-        }
-    }
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_left_x, wrapped_above_y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, x, wrapped_above_y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_right_x, wrapped_above_y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_left_x, y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, x, y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_right_x, y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_left_x, wrapped_below_y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, x, wrapped_below_y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_right_x, wrapped_below_y);
 
     return num_infected_neighbors;
 }
@@ -148,5 +162,5 @@ void simulation_move_individuals_random(Simulation *simulation)
 void simulation_destroy(Simulation *simulation)
 {
     grid_destroy(&simulation->grid);
-    free(simulation->individuals);
+    individual_soa_destroy(&simulation->individual_soa);
 }

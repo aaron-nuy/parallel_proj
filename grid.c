@@ -48,3 +48,8 @@ void grid_destroy(Grid *grid)
 {
     return &grid->cells[y * grid->width + x];
 }
+
+[[nodiscard]] u32 grid_get_cell_value(const Grid *grid, const u32 x, const u32 y)
+{
+    return grid->cells[y * grid->width + x];
+}

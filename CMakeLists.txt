@@ -11,18 +11,19 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU")
     add_compile_options(-fno-diagnostics-color)
 endif ()
 
+find_package(raylib REQUIRED)
 find_package(MPI REQUIRED)
 
 set(COMMON_SOURCES
         main.c
         rand_utils.c
-        individual.c
         grid.c
         simulation.c
+        individual_soa.c
 )
 
 add_executable(seq_proj ${COMMON_SOURCES})
-target_link_libraries(seq_proj PRIVATE m)
+target_link_libraries(seq_proj PRIVATE raylib m)
 target_compile_definitions(seq_proj PRIVATE SEQUENTIAL)
 
 add_executable(par_proj ${COMMON_SOURCES})
