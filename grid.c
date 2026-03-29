@@ -9,9 +9,9 @@
 
 [[nodiscard]] Grid grid_create(u32 width, u32 height)
 {
-    u32* cells = malloc(width * height * sizeof(u32));
+    u8* cells = malloc(width * height * sizeof(u8));
 
-    memset(cells, 0, width * height * sizeof(u32));
+    memset(cells, 0, width * height * sizeof(u8));
 
     return (Grid)
     {
@@ -25,7 +25,7 @@ void grid_add_individual(Grid *grid, u32 x, u32 y, bool infected)
 {
     if (infected)
     {
-        u32 *cell = grid_get_cell(grid, x, y);
+        u8 *cell = grid_get_cell(grid, x, y);
         (*cell)++;
     }
 }
@@ -34,7 +34,7 @@ void grid_remove_individual(Grid *grid, u32 x, u32 y, bool infected)
 {
     if (infected)
     {
-        u32 *cell = grid_get_cell(grid, x, y);
+        u8 *cell = grid_get_cell(grid, x, y);
         (*cell)--;
     }
 }
@@ -44,12 +44,12 @@ void grid_destroy(Grid *grid)
     free(grid->cells);
 }
 
-[[nodiscard]] u32* grid_get_cell(const Grid *grid, const u32 x, const u32 y)
+[[nodiscard]] u8* grid_get_cell(const Grid *grid, const u32 x, const u32 y)
 {
     return &grid->cells[y * grid->width + x];
 }
 
-[[nodiscard]] u32 grid_get_cell_value(const Grid *grid, const u32 x, const u32 y)
+[[nodiscard]] u8 grid_get_cell_value(const Grid *grid, const u32 x, const u32 y)
 {
     return grid->cells[y * grid->width + x];
 }

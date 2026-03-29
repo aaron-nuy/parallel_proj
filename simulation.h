@@ -26,6 +26,6 @@ void simulation_destroy(Simulation *simulation);
 
 void simulation_step(Simulation *simulation);
 
-[[nodiscard]] u32 simulation_get_num_infected_neighbors(Simulation *simulation, u32 x, u32 y);
+[[nodiscard]] u8 simulation_get_num_infected_neighbors(Simulation *simulation, u32 x, u32 y);
 
 #endif //PARALLEL_PROJ_SIMULATION_H

@@ -4,7 +4,7 @@ project(parallel_proj C)
 
 set(CMAKE_C_STANDARD 23)
 
-set(CMAKE_C_FLAGS_RELEASE "-O3 -flto -DNDEBUG -mavx2")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -flto -DNDEBUG -mavx2 -ffast-math")
 set(CMAKE_C_FLAGS_DEBUG   "-O0 -g")
 
 if (CMAKE_C_COMPILER_ID MATCHES "GNU")

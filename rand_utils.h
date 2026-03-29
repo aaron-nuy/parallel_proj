@@ -20,7 +20,8 @@ i32 rand_rand();
 
 [[nodiscard]] f64 rand_f64_negexp(f64 mean);
 
-[[nodiscard]] bool should_transition(u32 num_inf_neighbors);
+[[nodiscard]] bool should_transition(u8 num_inf_neighbors);
 
+[[nodiscard]] i32 rand_i32_between_0_and_300_biased();
 
 #endif //PARALLEL_PROJ_RAND_UTILS_H

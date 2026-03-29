@@ -7,16 +7,16 @@
 #include "typedefs.h"
 
 typedef struct {
-    u32* cells;
+    u8* cells;
     u32 width;
     u32 height;
 } Grid;
 
 [[nodiscard]] Grid grid_create(u32 width, u32 height);
 
-[[nodiscard]] u32 *grid_get_cell(const Grid *grid, u32 x, u32 y);
+[[nodiscard]] u8 *grid_get_cell(const Grid *grid, u32 x, u32 y);
 
-[[nodiscard]] u32 grid_get_cell_value(const Grid *grid, u32 x, u32 y);
+[[nodiscard]] u8 grid_get_cell_value(const Grid *grid, u32 x, u32 y);
 
 void grid_add_individual(Grid *grid, u32 x, u32 y, bool infected);
 

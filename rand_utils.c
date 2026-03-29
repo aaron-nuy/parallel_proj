@@ -5,6 +5,7 @@
 #include "rand_utils.h"
 #include <math.h>
 #include <float.h>
+#include <stdio.h>
 
 
 #define _RAND_DEG  31
@@ -59,7 +60,7 @@ void rand_init(u32 seed)
 
 [[nodiscard]] i32 rand_i32_uniform(i32 min, i32 max)
 {
-    return min + rand_rand() % (max - min + 1);
+    return min + (i32)(((u64)(u32)rand_rand() * (u32)(max - min + 1)) >> 32);
 }
 
 [[nodiscard]] f64 rand_f64_uniform(f64 min, f64 max)
@@ -80,8 +81,7 @@ void rand_init(u32 seed)
     return -mean * log(1.0 - u);
 }
 
-[[nodiscard]] bool should_transition(u32 num_inf_neighbors)
+[[nodiscard]] bool should_transition(u8 num_inf_neighbors)
 {
-    const f64 p = 1 - exp(-0.5 * num_inf_neighbors);
-    return p > rand_f64_uniform_01();
+    return 1 - exp(-0.5 * num_inf_neighbors) > rand_f64_uniform_01();
 }

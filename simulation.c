@@ -76,7 +76,7 @@ void simulation_step(Simulation *simulation)
         switch (states[i])
         {
             case Susceptible: {
-                const u32 num_infected_neighbors = simulation_get_num_infected_neighbors(
+                const u8 num_infected_neighbors = simulation_get_num_infected_neighbors(
                     simulation, grid_poss_x[i], grid_poss_y[i]);
 
                 if (should_transition(num_infected_neighbors))
@@ -135,9 +135,9 @@ void simulation_step(Simulation *simulation)
  * @param index
  * @return
  */
-[[nodiscard]] u32 simulation_get_num_infected_neighbors(Simulation *simulation, u32 x, u32 y)
+[[nodiscard]] u8 simulation_get_num_infected_neighbors(Simulation *simulation, u32 x, u32 y)
 {
-    u32 num_infected_neighbors = 0;
+    u8 num_infected_neighbors = 0;
     const u32 width = simulation->grid.width;
     const u32 height = simulation->grid.height;
 
