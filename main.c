@@ -44,10 +44,15 @@ int main(int argc, char **argv)
             (end_time.tv_sec - start_time.tv_sec) +
             (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
 
+    simulation_output_csv(&simulation);
+    simulation_print_last(&simulation);
+
     simulation_destroy(&simulation);
 
+    printf("\n");
     printf("Cycles taken to simulate were: %lu cycles\n", (u64) (end_cycles - start_cycles));
     printf("Time taken to simulate was: %f seconds\n", elapsed_time);
+
 
     return 0;
 }

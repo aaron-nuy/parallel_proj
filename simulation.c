@@ -4,18 +4,24 @@
 
 #include "simulation.h"
 
+#include <string.h>
+
 #include "rand_utils.h"
 
-[[nodiscard]] Simulation simulation_create(u32 total_individuals, u32 iteratoins_to_run, u32 grid_width,
+[[nodiscard]] Simulation simulation_create(u32 total_individuals, u32 iterations_to_run, u32 grid_width,
                                            u32 grid_height)
 {
+    OutputData *output_data = malloc(sizeof(OutputData) * iterations_to_run);
+    memset(output_data, 0, sizeof(OutputData) * iterations_to_run);
+
     return (Simulation)
     {
         .total_individuals = total_individuals,
         .current_iter = 0,
-        .iterations_to_run = iteratoins_to_run,
+        .iterations_to_run = iterations_to_run,
         .grid = grid_create(grid_width, grid_height),
-        .individual_soa = individual_soa_create(total_individuals)
+        .individual_soa = individual_soa_create(total_individuals),
+        .output_data = output_data
     };
 }
 
@@ -43,7 +49,8 @@ void simulation_populate(Simulation *simulation)
         simulation->individual_soa.infecteds[i] = di;
         simulation->individual_soa.recovereds[i] = dr;
 
-        grid_add_individual(&simulation->grid, x_pos, y_pos, state == Infected);
+        if (state == Infected)
+            grid_add_individual(&simulation->grid, x_pos, y_pos);
     }
 }
 
@@ -61,6 +68,8 @@ void simulation_step(Simulation *simulation)
     IndividualState *states = simulation->individual_soa.states;
     IndividualState *previous_states = simulation->individual_soa.previous_states;
     u32 *times_in_state = simulation->individual_soa.times_in_state;
+    OutputData *output_data = simulation->output_data;
+    u32 curr_iter = simulation->current_iter;
 
     u32 *grid_poss_x = simulation->individual_soa.grid_poss_x;
     u32 *grid_poss_y = simulation->individual_soa.grid_poss_y;
@@ -76,6 +85,7 @@ void simulation_step(Simulation *simulation)
         switch (states[i])
         {
             case Susceptible: {
+                output_data[curr_iter].num_susceptible++;
                 const u8 num_infected_neighbors = simulation_get_num_infected_neighbors(
                     simulation, grid_poss_x[i], grid_poss_y[i]);
 
@@ -87,6 +97,7 @@ void simulation_step(Simulation *simulation)
                 break;
             }
             case Exposed:
+                output_data[curr_iter].num_exposed++;
                 if (times_in_state[i] > exposed[i])
                 {
                     states[i] = Infected;
@@ -94,6 +105,7 @@ void simulation_step(Simulation *simulation)
                 }
                 break;
             case Infected:
+                output_data[curr_iter].num_infected++;
                 if (times_in_state[i] > infected[i])
                 {
                     states[i] = Recovered;
@@ -101,6 +113,7 @@ void simulation_step(Simulation *simulation)
                 }
                 break;
             case Recovered:
+                output_data[curr_iter].num_recovered++;
                 if (times_in_state[i] > recovered[i])
                 {
                     states[i] = Susceptible;
@@ -114,15 +127,20 @@ void simulation_step(Simulation *simulation)
 
     for (u32 i = 0; i < simulation->total_individuals; i++)
     {
-        grid_remove_individual(&simulation->grid, grid_poss_x[i],
-                               grid_poss_y[i],
-                               previous_states[i] == Infected);
+        if (previous_states[i] == Infected)
+        {
+            grid_remove_individual(&simulation->grid, grid_poss_x[i],
+                                   grid_poss_y[i]);
+        }
 
         grid_poss_x[i] = rand_i32_uniform(0, simulation->grid.width - 1);
         grid_poss_y[i] = rand_i32_uniform(0, simulation->grid.height - 1);
 
-        grid_add_individual(&simulation->grid, grid_poss_x[i],
-                            grid_poss_y[i], states[i] == Infected);
+        if (states[i] == Infected)
+        {
+            grid_add_individual(&simulation->grid, grid_poss_x[i],
+                                grid_poss_y[i]);
+        }
     }
 }
 
@@ -130,37 +148,69 @@ void simulation_step(Simulation *simulation)
 /**
  * Shouldn't be called on non-susceptible Agent
  * @param simulation
- * @param x
- * @param y
+ * @param curr_x
+ * @param curr_y
  * @param index
  * @return
  */
-[[nodiscard]] u8 simulation_get_num_infected_neighbors(Simulation *simulation, u32 x, u32 y)
+[[nodiscard]] u8 simulation_get_num_infected_neighbors(Simulation *simulation, u32 curr_x, u32 curr_y)
 {
     u8 num_infected_neighbors = 0;
     const u32 width = simulation->grid.width;
     const u32 height = simulation->grid.height;
 
-    u32 wrapped_left_x = x == 0 ? width - 1 : x - 1;
-    u32 wrapped_right_x = x == width - 1 ? 0 : x + 1;
-    u32 wrapped_above_y = y == 0 ? height - 1 : y - 1;
-    u32 wrapped_below_y = y == height - 1 ? 0 : y + 1;
+    u32 wrapped_left_x = curr_x == 0 ? width - 1 : curr_x - 1;
+    u32 wrapped_right_x = curr_x == width - 1 ? 0 : curr_x + 1;
+    u32 wrapped_above_y = curr_y == 0 ? height - 1 : curr_y - 1;
+    u32 wrapped_below_y = curr_y == height - 1 ? 0 : curr_y + 1;
 
     num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_left_x, wrapped_above_y);
-    num_infected_neighbors += grid_get_cell_value(&simulation->grid, x, wrapped_above_y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, curr_x, wrapped_above_y);
     num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_right_x, wrapped_above_y);
-    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_left_x, y);
-    num_infected_neighbors += grid_get_cell_value(&simulation->grid, x, y);
-    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_right_x, y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_left_x, curr_y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, curr_x, curr_y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_right_x, curr_y);
     num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_left_x, wrapped_below_y);
-    num_infected_neighbors += grid_get_cell_value(&simulation->grid, x, wrapped_below_y);
+    num_infected_neighbors += grid_get_cell_value(&simulation->grid, curr_x, wrapped_below_y);
     num_infected_neighbors += grid_get_cell_value(&simulation->grid, wrapped_right_x, wrapped_below_y);
 
     return num_infected_neighbors;
+}
+
+void simulation_output_csv(Simulation *simulation)
+{
+    FILE *file = fopen("output.csv", "w");
+    if (!file)
+    {
+        perror("fopen");
+        return;
+    }
+
+    fprintf(file, "iteration,num_susceptible,num_exposed,num_infected,num_recovered\n");
+
+    for (u32 i = 0; i < simulation->iterations_to_run; i++)
+    {
+        OutputData *data = &simulation->output_data[i];
+        fprintf(file, "%u,%u,%u,%u,%u\n",
+                i, data->num_susceptible, data->num_exposed,
+                data->num_infected, data->num_recovered);
+    }
+
+    fclose(file);
+}
+
+void simulation_print_last(Simulation *simulation)
+{
+    u32 last = simulation->iterations_to_run - 1;
+    OutputData *data = &simulation->output_data[last];
+    printf("iteration=%u\nS=%u\nE=%u\nI=%u\nR=%u\n",
+           last, data->num_susceptible, data->num_exposed,
+           data->num_infected, data->num_recovered);
 }
 
 void simulation_destroy(Simulation *simulation)
 {
     grid_destroy(&simulation->grid);
     individual_soa_destroy(&simulation->individual_soa);
+    free(simulation->output_data);
 }

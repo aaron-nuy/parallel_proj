@@ -18,9 +18,9 @@ typedef struct {
 
 [[nodiscard]] u8 grid_get_cell_value(const Grid *grid, u32 x, u32 y);
 
-void grid_add_individual(Grid *grid, u32 x, u32 y, bool infected);
+void grid_add_individual(Grid *grid, u32 x, u32 y);
 
-void grid_remove_individual(Grid *grid, u32 x, u32 y, bool infected);
+void grid_remove_individual(Grid *grid, u32 x, u32 y);
 
 void grid_destroy(Grid *grid);
 

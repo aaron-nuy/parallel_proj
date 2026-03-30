@@ -21,22 +21,16 @@
     };
 }
 
-void grid_add_individual(Grid *grid, u32 x, u32 y, bool infected)
+void grid_add_individual(Grid *grid, u32 x, u32 y)
 {
-    if (infected)
-    {
         u8 *cell = grid_get_cell(grid, x, y);
         (*cell)++;
-    }
 }
 
-void grid_remove_individual(Grid *grid, u32 x, u32 y, bool infected)
+void grid_remove_individual(Grid *grid, u32 x, u32 y)
 {
-    if (infected)
-    {
         u8 *cell = grid_get_cell(grid, x, y);
         (*cell)--;
-    }
 }
 
 void grid_destroy(Grid *grid)
