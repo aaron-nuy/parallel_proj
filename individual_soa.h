@@ -8,8 +8,8 @@
 
 #include "typedefs.h"
 
-typedef enum {
-    Susceptible = (u8) 0,
+typedef enum : u8 {
+    Susceptible = 0,
     Exposed,
     Infected,
     Recovered
@@ -17,7 +17,9 @@ typedef enum {
 
 typedef struct {
     IndividualState *states;
+#ifdef SEQUENTIAL
     IndividualState *previous_states;
+#endif
     u32 *times_in_state;
 
     u32 *grid_poss_x;

@@ -81,8 +81,32 @@ void rand_init(u32 seed)
     return -mean * log(1.0 - u);
 }
 
+u64 hash_u64(u64 x) {
+    x ^= x >> 30;
+    x *= 0xbf58476d1ce4e5b9ULL;
+    x ^= x >> 27;
+    x *= 0x94d049bb133111ebULL;
+    x ^= x >> 31;
+    return x;
+}
+
+[[nodiscard]] f64 rand_f64_uniform_01_stateless(u32 iteration, u32 id) {
+    u64 seed = ((u64)iteration << 32) | id;
+    u64 hash = hash_u64(seed);
+    return (f64)hash / (f64)0xFFFFFFFFFFFFFFFFULL;
+}
+
+#ifndef SEQUENTIAL
+[[nodiscard]] bool should_transition(u8 num_inf_neighbors, f64 prob_transition)
+{
+    if (num_inf_neighbors == 0) return false;
+    return 1 - exp(-0.5 * num_inf_neighbors) > prob_transition;
+}
+#else
 [[nodiscard]] bool should_transition(u8 num_inf_neighbors)
 {
     if (num_inf_neighbors == 0) return false;
     return 1 - exp(-0.5 * num_inf_neighbors) > rand_f64_uniform_01();
 }
+#endif
+

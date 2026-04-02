@@ -7,7 +7,9 @@
 inline void individual_soa_destroy(IndividualSoA *soa)
 {
     free(soa->states);
+#ifdef SEQUENTIAL
     free(soa->previous_states);
+#endif
     free(soa->times_in_state);
     free(soa->grid_poss_x);
     free(soa->grid_poss_y);
@@ -20,7 +22,9 @@ IndividualSoA individual_soa_create(u32 total_individuals)
 {
     return (IndividualSoA){
         .states = malloc(total_individuals * sizeof(IndividualState)),
+#ifdef SEQUENTIAL
         .previous_states = malloc(total_individuals * sizeof(IndividualState)),
+#endif
         .times_in_state = malloc(total_individuals * sizeof(u32)),
         .grid_poss_x = malloc(total_individuals * sizeof(u32)),
         .grid_poss_y = malloc(total_individuals * sizeof(u32)),
