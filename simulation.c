@@ -263,7 +263,8 @@ void simulation_populate(Simulation *simulation, i32 world_rank, i32 world_size)
             offset += num_individuals;
         }
 
-        MPI_Scatterv(all_individual_soa.states, counts, displacements, MPI_UNSIGNED_CHAR, simulation->individual_soa.states,
+        MPI_Scatterv(all_individual_soa.states, counts, displacements, MPI_UNSIGNED_CHAR,
+                     simulation->individual_soa.states,
                      (i32) simulation->local_count, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
         MPI_Scatterv(all_individual_soa.previous_states, counts, displacements, MPI_UNSIGNED_CHAR,
                      simulation->individual_soa.previous_states, (i32) simulation->local_count, MPI_UNSIGNED_CHAR, 0,
@@ -271,15 +272,20 @@ void simulation_populate(Simulation *simulation, i32 world_rank, i32 world_size)
         MPI_Scatterv(all_individual_soa.times_in_state, counts, displacements, MPI_UNSIGNED,
                      simulation->individual_soa.times_in_state,
                      (i32) simulation->local_count, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
-        MPI_Scatterv(all_individual_soa.grid_poss_x, counts, displacements, MPI_UNSIGNED, simulation->individual_soa.grid_poss_x,
+        MPI_Scatterv(all_individual_soa.grid_poss_x, counts, displacements, MPI_UNSIGNED,
+                     simulation->individual_soa.grid_poss_x,
                      (i32) simulation->local_count, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
-        MPI_Scatterv(all_individual_soa.grid_poss_y, counts, displacements, MPI_UNSIGNED, simulation->individual_soa.grid_poss_y,
+        MPI_Scatterv(all_individual_soa.grid_poss_y, counts, displacements, MPI_UNSIGNED,
+                     simulation->individual_soa.grid_poss_y,
                      (i32) simulation->local_count, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
-        MPI_Scatterv(all_individual_soa.exposeds, counts, displacements, MPI_DOUBLE, simulation->individual_soa.exposeds,
+        MPI_Scatterv(all_individual_soa.exposeds, counts, displacements, MPI_DOUBLE,
+                     simulation->individual_soa.exposeds,
                      (i32) simulation->local_count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        MPI_Scatterv(all_individual_soa.infecteds, counts, displacements, MPI_DOUBLE, simulation->individual_soa.infecteds,
+        MPI_Scatterv(all_individual_soa.infecteds, counts, displacements, MPI_DOUBLE,
+                     simulation->individual_soa.infecteds,
                      (i32) simulation->local_count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        MPI_Scatterv(all_individual_soa.recovereds, counts, displacements, MPI_DOUBLE, simulation->individual_soa.recovereds,
+        MPI_Scatterv(all_individual_soa.recovereds, counts, displacements, MPI_DOUBLE,
+                     simulation->individual_soa.recovereds,
                      (i32) simulation->local_count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
         individual_soa_destroy(&all_individual_soa);
         free(counts);
@@ -327,7 +333,6 @@ void simulation_step(Simulation *simulation)
 
     for (u32 local_individual_index = 0; local_individual_index < local_count; local_individual_index++)
     {
-
         switch (states[local_individual_index])
         {
             case Susceptible:
@@ -373,24 +378,16 @@ void simulation_step(Simulation *simulation)
 
     memset(simulation->grid.cells, 0, width * height * sizeof(u8));
 
-    // Don't optimize this
-    // makes sure that all processes call rand the same amount of times
-    // so the rand state is synchronized
-    for (u32 global_individual_index = 0; global_individual_index < simulation->total_individuals; global_individual_index++)
+    for (u32 local_individual_index = 0; local_individual_index < simulation->local_count; local_individual_index++)
     {
+        u32 new_x = rand_i32_uniform(0, width - 1);
+        u32 new_y = rand_i32_uniform(0, height - 1);
 
-        if (global_individual_index >= simulation->local_start && global_individual_index < simulation->local_start + local_count)
+        grid_poss_x[local_individual_index] = new_x;
+        grid_poss_y[local_individual_index] = new_y;
+        if (states[local_individual_index] == Infected)
         {
-            u32 new_x = rand_i32_uniform(0, width - 1);
-            u32 new_y = rand_i32_uniform(0, height - 1);
-
-            u32 li = global_individual_index - simulation->local_start;
-            grid_poss_x[li] = new_x;
-            grid_poss_y[li] = new_y;
-            if (states[li] == Infected)
-            {
-                simulation->grid.cells[new_y * width + new_x]++;
-            }
+            simulation->grid.cells[new_y * width + new_x]++;
         }
     }
 
