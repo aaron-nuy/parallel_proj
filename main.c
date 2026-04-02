@@ -12,7 +12,7 @@ const u32 GRID_WIDTH = 300;
 const u32 GRID_HEIGHT = 300;
 const u32 TOTAL_INDIVIDUALS = 20000;
 const u32 SEED = 42;
-const u32 ITERATIONS_TO_RUN = 365;
+const u32 ITERATIONS_TO_RUN = 365 + 1;
 
 [[nodiscard]] u64 rdtsc()
 {
@@ -72,8 +72,8 @@ int main(int argc, char **argv)
     struct timespec start_time, end_time;
     f64 elapsed_time;
 
-    simulation = simulation_create(TOTAL_INDIVIDUALS, ITERATIONS_TO_RUN, GRID_WIDTH, GRID_HEIGHT);
-    simulation_populate(&simulation);
+    simulation = simulation_create(TOTAL_INDIVIDUALS, ITERATIONS_TO_RUN, GRID_WIDTH, GRID_HEIGHT, world_rank, world_size);
+    simulation_populate(&simulation, world_rank, world_size);
 
     if (world_rank == 0)
     {
@@ -92,15 +92,20 @@ int main(int argc, char **argv)
                 (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
     }
 
-    simulation_destroy(&simulation);
-
-    MPI_Finalize();
-
     if (world_rank == 0)
     {
+        simulation_output_csv(&simulation);
+        simulation_print_last(&simulation);
+
+        printf("\n");
+
         printf("Cycles taken to simulate were: %lu cycles\n", (u64) (end_cycles - start_cycles));
         printf("Time taken to simulate was: %f seconds\n", elapsed_time);
     }
+
+    simulation_destroy(&simulation);
+
+    MPI_Finalize();
 
     return 0;
 }

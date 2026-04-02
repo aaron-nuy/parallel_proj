@@ -7,11 +7,6 @@ set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_FLAGS_RELEASE "-O3 -flto -DNDEBUG -mavx2 -ffast-math")
 set(CMAKE_C_FLAGS_DEBUG   "-O0 -g")
 
-if (CMAKE_C_COMPILER_ID MATCHES "GNU")
-    add_compile_options(-fno-diagnostics-color)
-endif ()
-
-find_package(raylib REQUIRED)
 find_package(MPI REQUIRED)
 
 set(COMMON_SOURCES
@@ -23,7 +18,7 @@ set(COMMON_SOURCES
 )
 
 add_executable(seq_proj ${COMMON_SOURCES})
-target_link_libraries(seq_proj PRIVATE raylib m)
+target_link_libraries(seq_proj PRIVATE m)
 target_compile_definitions(seq_proj PRIVATE SEQUENTIAL)
 
 add_executable(par_proj ${COMMON_SOURCES})

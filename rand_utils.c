@@ -83,5 +83,6 @@ void rand_init(u32 seed)
 
 [[nodiscard]] bool should_transition(u8 num_inf_neighbors)
 {
+    if (num_inf_neighbors == 0) return false;
     return 1 - exp(-0.5 * num_inf_neighbors) > rand_f64_uniform_01();
 }
