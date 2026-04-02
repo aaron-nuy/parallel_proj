@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     struct timespec start_time, end_time;
     f64 elapsed_time;
 
-    auto simulation = simulation_create(TOTAL_INDIVIDUALS, ITERATIONS_TO_RUN, GRID_WIDTH, GRID_HEIGHT);
+    Simulation simulation = simulation_create(TOTAL_INDIVIDUALS, ITERATIONS_TO_RUN, GRID_WIDTH, GRID_HEIGHT);
     simulation_populate(&simulation);
 
     clock_gettime(CLOCK_MONOTONIC, &start_time);
