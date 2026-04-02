@@ -2,7 +2,7 @@
 
 ## Simulation SEIR
 
-Nécessite une version de CMake supérieure ou égale à 3.20 pour compiler le projet
+Nécessite une version de CMake supérieure ou égale à 3.20 et MPI pour compiler le projet
 
 ```bash
 mkdir -p build && cd build
