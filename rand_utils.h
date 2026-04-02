@@ -20,15 +20,10 @@ i32 rand_rand();
 
 [[nodiscard]] f64 rand_f64_negexp(f64 mean);
 
-[[nodiscard]] f64 rand_f64_uniform_01_stateless(u32 iteration, u32 id);
-
 #ifndef SEQUENTIAL
 [[nodiscard]] bool should_transition(u8 num_inf_neighbors, f64 prob_transition);
 #else
 [[nodiscard]] bool should_transition(u8 num_inf_neighbors);
 #endif
-
-
-[[nodiscard]] i32 rand_i32_between_0_and_300_biased();
 
 #endif //PARALLEL_PROJ_RAND_UTILS_H
