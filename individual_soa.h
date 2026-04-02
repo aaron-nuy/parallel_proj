@@ -8,12 +8,14 @@
 
 #include "typedefs.h"
 
-typedef enum : u8 {
+typedef u8 IndividualState;
+
+enum {
     Susceptible = 0,
     Exposed,
     Infected,
     Recovered
-} IndividualState;
+};
 
 typedef struct {
     IndividualState *states;
