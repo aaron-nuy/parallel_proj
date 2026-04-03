@@ -82,8 +82,8 @@ void simulation_populate(Simulation *simulation)
         // Only 20
         IndividualState state = (i % 1000 == 0) ? Infected : Susceptible;
 
-        u32 x = rand_i32_uniform(0, simulation->grid.width - 1);
-        u32 y = rand_i32_uniform(0, simulation->grid.height - 1);
+        u32 x = rand_i32_0_300();
+        u32 y = rand_i32_0_300();
 
         f64 de = rand_f64_negexp(3.0);
         f64 di = rand_f64_negexp(7.0);
@@ -169,8 +169,8 @@ void simulation_step(Simulation *simulation)
         if (previous_states[i] == Infected)
             grid_remove_individual(&simulation->grid, grid_poss_x[i], grid_poss_y[i]);
 
-        grid_poss_x[i] = rand_i32_uniform(0, simulation->grid.width - 1);
-        grid_poss_y[i] = rand_i32_uniform(0, simulation->grid.height - 1);
+        grid_poss_x[i] = rand_i32_0_300();
+        grid_poss_y[i] = rand_i32_0_300();
 
         if (states[i] == Infected)
             grid_add_individual(&simulation->grid, grid_poss_x[i], grid_poss_y[i]);
@@ -224,8 +224,8 @@ void simulation_populate(Simulation *simulation, i32 world_rank, i32 world_size)
             // Only 20 infected
             IndividualState state = (i % 1000 == 0) ? Infected : Susceptible;
 
-            u32 x = rand_i32_uniform(0, simulation->grid.width - 1);
-            u32 y = rand_i32_uniform(0, simulation->grid.height - 1);
+            u32 x = rand_i32_0_300();
+            u32 y = rand_i32_0_300();
 
             f64 de = rand_f64_negexp(3.0);
             f64 di = rand_f64_negexp(7.0);
@@ -331,8 +331,6 @@ void simulation_step(Simulation *simulation)
             case Susceptible:
                 local_data[0]++;
 
-                u32 global_individual_index = simulation->local_start + local_individual_index;
-
                 const int num_inf_neighbs = simulation_get_num_infected_neighbors(
                     simulation, grid_poss_x[local_individual_index], grid_poss_y[local_individual_index]);
                 if (should_transition(num_inf_neighbs, rand_f64_uniform_01()))
@@ -377,8 +375,8 @@ void simulation_step(Simulation *simulation)
     for (u32 local_individual_index = 0; local_individual_index < simulation->local_count;
          local_individual_index++)
     {
-        u32 new_x = rand_i32_uniform(0, width - 1);
-        u32 new_y = rand_i32_uniform(0, height - 1);
+        u32 new_x = rand_i32_0_300();
+        u32 new_y = rand_i32_0_300();
 
         grid_poss_x[local_individual_index] = new_x;
         grid_poss_y[local_individual_index] = new_y;

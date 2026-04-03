@@ -12,7 +12,7 @@ void rand_init(u32 seed);
 
 i32 rand_rand();
 
-[[nodiscard]] i32 rand_i32_uniform(i32 min, i32 max);
+[[nodiscard]] i32 rand_i32_0_300();
 
 [[nodiscard]] f64 rand_f64_uniform(f64 min, f64 max);
 

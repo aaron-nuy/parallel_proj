@@ -58,9 +58,9 @@ void rand_init(u32 seed)
     return result;
 }
 
-[[nodiscard]] i32 rand_i32_uniform(i32 min, i32 max)
+[[nodiscard]] i32 rand_i32_0_300()
 {
-    return min + (i32)(((u64)(u32)rand_rand() * (u32)(max - min + 1)) >> 32);
+    return (i32)(((u64)(u32)rand_rand() * (u32)(300ul)) >> 31);
 }
 
 [[nodiscard]] f64 rand_f64_uniform(f64 min, f64 max)
