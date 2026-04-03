@@ -12,7 +12,7 @@ const u32 GRID_WIDTH = 300;
 const u32 GRID_HEIGHT = 300;
 const u32 TOTAL_INDIVIDUALS = 20000;
 const u32 SEED = 42;
-const u32 ITERATIONS_TO_RUN = 365 + 1;
+const u32 ITERATIONS_TO_RUN = 365;
 
 [[nodiscard]] u64 rdtsc()
 {

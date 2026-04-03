@@ -12,8 +12,6 @@ void rand_init(u32 seed);
 
 i32 rand_rand();
 
-[[nodiscard]] i32 rand_i32_uniform(i32 min, i32 max);
-
 [[nodiscard]] f64 rand_f64_uniform(f64 min, f64 max);
 
 [[nodiscard]] f64 rand_f64_uniform_01();
@@ -28,7 +26,6 @@ i32 rand_rand();
 [[nodiscard]] bool should_transition(u8 num_inf_neighbors);
 #endif
 
-
-[[nodiscard]] i32 rand_i32_between_0_and_300_biased();
+[[nodiscard]] i32 rand_i32_0_300();
 
 #endif //PARALLEL_PROJ_RAND_UTILS_H
