@@ -22,7 +22,7 @@ void rand_init(u32 seed)
 
 [[nodiscard]] i32 rand_rand(void)
 {
-    rand();
+    return rand();
 }
 
 [[nodiscard]] i32 rand_i32_uniform(i32 min, i32 max)
