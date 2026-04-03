@@ -17,7 +17,7 @@ static int _rand_rptr = 0;
 
 void rand_init(u32 seed)
 {
-    srand(seed)
+    srand(seed);
 }
 
 [[nodiscard]] i32 rand_rand(void)
